@@ -2,32 +2,39 @@ pipeline {
     agent any
 
     options {
-        ansiColor('xterm')       // Works after AnsiColor plugin installation
-        timestamps()             // Optional: shows time in logs
+        timestamps()   // This is valid here
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/JeevanandhanM/TUI.git'
+                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                    git branch: 'main', url: 'https://github.com/JeevanandhanM/TUI.git'
+                }
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                    sh 'npm install'
+                }
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'npm run eslint'
+                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                    sh 'npm run eslint'
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'npx playwright test'
+                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                    sh 'npx playwright test'
+                }
             }
         }
     }
