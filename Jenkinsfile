@@ -1,47 +1,36 @@
 pipeline {
     agent any
-
-    options {
-        timestamps()   // This is valid here
-    }
-
+ 
     stages {
         stage('Checkout') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    git branch: 'main', url: 'https://github.com/JeevanandhanM/TUI.git'
-                }
+                git branch: 'main', url: 'https://github.com/JeevanandhanM/TUI.git'
             }
         }
-
+ 
         stage('Install Dependencies') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    sh 'npm install'
-                }
+                bat 'npm install'
             }
         }
-
-        stage('Lint') {
+ 
+        stage('Run Playwright Tests') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    sh 'npm run eslint'
-                }
+                bat 'npx playwright install --with-deps'
+                bat 'npx playwright test'
             }
         }
-
-        stage('Run Tests') {
+ 
+        stage('Publish Report') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    sh 'npx playwright test'
-                }
+                publishHTML(target: [
+                    allowMissing: false,
+                    keepAll: true,
+                    reportDir: 'playwright-report',
+                    reportFiles: 'index.html',
+                    reportName: 'Playwright Test Report'
+                ])
             }
-        }
-    }
-
-    post {
-        always {
-            echo "Pipeline completed!"
         }
     }
 }
